@@ -2,6 +2,9 @@
 #include "graph.h"
 #include "dijkstra.h"
 #include <iomanip>
+#include <unordered_map>
+
+using std::unordered_map;
 bool ReadRoad(const string& road_path, vector<Road>& roads);
 bool ReadCross(const string& cross_path, vector<Cross>& cross);
 bool ReadCar(const string& car_path, vector<Car>& cars);
@@ -34,6 +37,9 @@ int main(int argc, char *argv[])
 
   vector<Car> cars;
   ReadCar(carPath, cars);
+
+  unordered_map<int, vector<int>> read_car;
+
 
   Graph graph(roads, crosses.size());
   vector<vector<int>> cost_matrix(crosses.size()+1, vector<int>(crosses.size()+1, INF));

@@ -1,22 +1,64 @@
+#ifndef DISPATCH_h_
+#define DISPATCH_h_
 
 #include <vector>
+#include <utility>
+#include <unordered_map>
 
 #include "road.h"
 #include "cross.h"
+#include "car.h"
 
+using std::unordered_map;
+using std::pair;
 using std::vector;
 
-void Dispath(vector<Car> cars, vector<Road> roads, vector<Cross> crosses){
+void Dispath(vector<Car> cars, vector<Road>& roads, vector<Cross>& crosses){
   int roads_num = roads.size();
   int crosses_num = crosses.size();
   int cars_num = cars.size();
-  while(){
+  int T_count=0;
+  while(1){//not all car finished
     for(int i=0; i<roads_num; i++){
       roads[i].RoadRun(cars);
     }
+
+    vector<pair<int, int>> init_solution;
+    for(int i=0; i<crosses_num; i++){
+     crosses[i].initialvalue();
+    }
+
+    vector<Car> solution;
+
+    //tabu(cars, roads, crossed, solution);
+
+    AddNewCar();
+    T_count++;
   }
-
-
-
-
 }
+// add those cars which should launch at time T_count
+void AddNewCar(int T_count, vector<Car>& cars, unordered_map<int, vector<int>>& ready_car, vector<Road> roads){
+  int ready_car_num = ready_car[T_count].size();
+  for(int i = 0; i<ready_car_num; i++){
+    int car_id = ready_car[T_count][i];
+    int cross_id = parent_matrix[cars[car_id].start][cars[car_id].end];
+    int road_id = global_map[cars[car_id].start][cross_id];
+    if(cross_id == roads[road_id].end){
+      if( roads[road_id].AddCar(cars, car_id, 0) == false){ //if the car fail to launch at time T_count, then try to launch it in time T_count+1  
+        ready_car[T_count+1].push_back(car_id);
+      }
+    }
+    else{
+      if(roads[road_id].AddCar(cars, car_id, 0) == false){
+        ready_car[count+1].push_back(car_id);
+      }
+    }
+  }
+}
+
+// void RecordSulution(vector<Car>& cars, vector<Car> solution){
+//   for()
+// }
+
+
+#endif //DISPATCH_h_

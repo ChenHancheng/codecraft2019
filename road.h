@@ -3,12 +3,16 @@
 
 #include <vector>
 #include <algorithm>
+#include <queue>
 
+#include "car.h"
 #include "codecraft_util.h"
 
 using std::vector;
+using std::priority_queue;
 
 class Road{
+ public:
   int id;
   int length;
   int speed_limit;
@@ -17,61 +21,21 @@ class Road{
   int end;
   bool bidirectional;
 
-  vector<vector<int>> lane_end;
-  vector<vector<int>> lane_start;
+  vector<vector<int>> lane;
+  priority_queue<int> lane_wait;
+  int lane_last_pos;
+  int lane_last_time;
 
-  
+  vector<vector<int>> lane1;
+  priority_queue<int> lane1_wait;
+  int lane1_last_pos;
+  int lane1_last_time;
+
   int cars_num_road;
-  void RoadRun(vector<Car>& cars);
-  void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane)
+  int NewCarTime(int car_id);
+  bool AddCar(vector<Car>& cars, int car_id, int direction);
+  void RoadRun(vector<Car>& cars, priority_queue<int> lane_wait);
+  void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane, priority_queue<int> lane_wait);
 };
-
-void Road::RoadRun(vector<Car>& cars){
-  RoadRunLane(cars, lane_end);
-  if(bidirectional){
-    RoadRunLane(cars, lane_start);
-  }
-}
-void Road::RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane){
-  for(int i=0; i<channel; i++){
-    for(int j=0; j<length; j++){
-      int car_id = cars_end[i][j];
-      int last_car_id = 0;
-      if(car_id != 0){
-        if(last_car_id == 0){
-            if(cars[car_id].speed+j<=length){
-              cars[car_id].state = STOP;
-              cars[car_id].pos = cars[car_id].speed+j;
-
-              lane[i][j] = 0;
-              lane[i][cars[car_id].pos] = cars[car_id].pos;
-            else{
-              cars[car_id].state = STOP;
-            }
-        }
-        else {
-          if(cars[last_car_id].state == WAIT){
-            if(cars[car_id].speed+j< cars[last_car_id].pos){
-              cars[car_id].pos = cars[car_id].speed+j;
-              cars[car_id].state = STOP;
-
-              lane[i][j] = 0;
-              lane[i][cars[car_id].pos] = cars[car_id].pos;
-            }
-            else{
-              cars[car_id].state = WAIT;
-            }
-          }
-
-          if(cars[last_car_id].state == STOP){
-            cars[car_id].pos = min(cars[car_id].speed+j, cars[last_car_id].pos-1);
-            cars[car_id].state = STOP;
-          }
-        }
-        last_car_id = car_id;
-      }
-    }
-  }
-}
 
 #endif //ROAD_H_
