@@ -13,7 +13,7 @@ using std::unordered_map;
 using std::pair;
 using std::vector;
 
-void Dispath(vector<Car> cars, vector<Road>& roads, vector<Cross>& crosses){
+void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses){
   int roads_num = roads.size();
   int crosses_num = crosses.size();
   int cars_num = cars.size();
@@ -23,16 +23,19 @@ void Dispath(vector<Car> cars, vector<Road>& roads, vector<Cross>& crosses){
       roads[i].RoadRun(cars);
     }
 
-    vector<pair<int, int>> init_solution;
+    vector<Road> roads_tmp(roads);
+    vector<Car> cars_tmp(cars);
+    // vector<pair<int, int>> solution;
+    // vector<pair<int, int>> init_solution;
+
     for(int i=0; i<crosses_num; i++){
-     crosses[i].initialvalue();
+     crosses[i].InitialValue(roads_tmp, cars_tmp);
     }
 
-    vector<Car> solution;
-
     //tabu(cars, roads, crossed, solution);
+    RocordSlution(cars, cars_tmp, roads, roads_tmp);
+    AddNewCar(T_count, cars, ready_car, roads);
 
-    AddNewCar();
     T_count++;
   }
 }
@@ -49,16 +52,21 @@ void AddNewCar(int T_count, vector<Car>& cars, unordered_map<int, vector<int>>& 
       }
     }
     else{
-      if(roads[road_id].AddCar(cars, car_id, 0) == false){
-        ready_car[count+1].push_back(car_id);
+      if(roads[road_id].AddCar(cars, car_id, 1) == false){
+        ready_car[T_count+1].push_back(car_id);
       }
     }
   }
 }
 
-// void RecordSulution(vector<Car>& cars, vector<Car> solution){
-//   for()
-// }
+void RecordSulution(vector<Car>& cars, vector<Car>& cars_tmp, vector<Road>& roads, vector<Road>& road_tmp){
+  for(int i =0; i<cars.size(); i++){
+    cars[i] = cars_tmp[i];
+  }
+  for(int i=0; i<roads.size(); i++){
+     roads[i] = road_tmp[i];
+  }
+}
 
 
 #endif //DISPATCH_h_

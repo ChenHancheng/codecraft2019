@@ -22,7 +22,7 @@ bool Road::AddCar(vector<Car>& cars, int car_id, int direction){
       cars[car_id].path.push_back(id);
       cars[car_id].state = STOP;
 
-      lane[]
+      // lane[]
     }
     //if car comes from other roads
     else{
@@ -36,7 +36,7 @@ int Road::NewCarTime(int car_id){
 
 }
 
-void Road::RoadRun(vector<Car>& cars, priority_queue<int> lane_wait){
+void Road::RoadRun(vector<Car>& cars){
   RoadRunLane(cars, lane, lane_wait);
   if(bidirectional){
     RoadRunLane(cars, lane1, lane1_wait);

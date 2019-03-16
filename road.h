@@ -1,17 +1,18 @@
 #ifndef ROAD_H_
 #define ROAD_H_
 
-#include <vector>
 #include <algorithm>
 #include <queue>
+#include <vector>
 
 #include "car.h"
 #include "codecraft_util.h"
+#include "data_type.h"
 
-using std::vector;
 using std::priority_queue;
+using std::vector;
 
-class Road{
+class Road {
  public:
   int id;
   int length;
@@ -20,6 +21,19 @@ class Road{
   int start;
   int end;
   bool bidirectional;
+
+  Road() = default;
+  Road(const RoadData& road_data)
+      : id(road_data.id),
+        length(road_data.length),
+        speed_limit(road_data.speed_limit),
+        channel(road_data.channel),
+        start(road_data.start),
+        end(road_data.end),
+        bidirectional(road_data.bidirectional) {
+    lane = vector<vector<int>>(channel, vector<int>(length, 0));
+    if(bidirectional) lane1= vector<vector<int>>(channel, vector<int>(length, 0));
+  }
 
   vector<vector<int>> lane;
   priority_queue<int> lane_wait;
@@ -30,12 +44,13 @@ class Road{
   priority_queue<int> lane1_wait;
   int lane1_last_pos;
   int lane1_last_time;
-
   int cars_num_road;
+
   int NewCarTime(int car_id);
   bool AddCar(vector<Car>& cars, int car_id, int direction);
-  void RoadRun(vector<Car>& cars, priority_queue<int> lane_wait);
-  void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane, priority_queue<int> lane_wait);
+  void RoadRun(vector<Car>& cars);
+  void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane,
+                   priority_queue<int> lane_wait);
 };
 
-#endif //ROAD_H_
+#endif  // ROAD_H_
