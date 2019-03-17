@@ -28,24 +28,20 @@ int main(int argc, char *argv[])
 	
 	// TODO:read input filebuf
 	vector<Road> roads;
-	ReadRoad(roadPath, roads);
-
   vector<Cross> crosses;
-  ReadCross(crossPath, crosses);
-
   vector<Car> cars;
-  ReadCar(carPath, cars);
+  unordered_map<int, vector<int>> ready_cars;
 
-  unordered_map<int, vector<int>> ready_car;
+  ReadData(carPath, crossPath, roadPath, cars, crosses, roads, ready_cars);
 
   Graph graph(roads, crosses.size());
   vector<vector<int>> cost_matrix(crosses.size(), vector<int>(crosses.size()+1, INF));
   vector<vector<int>> parent_maxtrix(crosses.size(), vector<int>(crosses.size()+1, INF));
   for(int i = 0; i<crosses.size(); i++){
-    graph.Dijkstra(roads, i, cost_matrix, parent_maxtrix);
+    graph.Dijkstra(roads, i);
   }
 
-  // Dispatch(cars, roads, crosses);
+  Dispatch(cars, roads, crosses, graph, ready_cars);
 
   #ifdef DEBUG
     for(int i=0; i<crosses.size(); i++){

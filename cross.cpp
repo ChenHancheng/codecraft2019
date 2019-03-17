@@ -31,7 +31,7 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
         int road_id = dispatch_seq[j];
         int cross_id = roads[road_id].start==id?roads[road_id].end:roads[road_id].start;
 
-        int cost = roads[road_id].NewCarTime(car_id) + cost_matrix[cross_id][cars[car_id].end];
+        int cost = roads[road_id].NewCarTime(car_id) + cost_matrix[cross_id][cars[car_id].end]/cars[car_id].speed;
         if(cost <min_cost){
           next_road = road_id;
           min_cost = cost;

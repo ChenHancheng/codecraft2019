@@ -11,28 +11,32 @@ using std::priority_queue;
 
 bool Road::AddCar(vector<Car>& cars, int car_id, int direction){
   if(direction == 0){
-    int i=0;
-    while(i<channel && lane[i].back() == 0){
-      i++;
+    int channelNo=0;
+    while(channelNo<channel && lane[channelNo].back() == 0){
+      channelNo++;
     }
-    if(i == channel) return false;
+    if(channelNo == channel) return false;
     // if car starts from the garage
     if(cars[car_id].state == IN_GARAGE){
-      cars[car_id].pos = std::min(cars[car_id].speed+cars[car_id].pos, cars[lane1_last_pos].pos-1);
+      cars[car_id].pos = std::min(cars[car_id].speed+cars[car_id].pos, lane1_last_pos[channelNo]-1);
       cars[car_id].path.push_back(id);
       cars[car_id].state = STOP;
 
-      // lane[]
+      lane[channelNo]
+      lane_last_pos[channelNo]
+      lane1_last_time[channelNo ]
     }
     //if car comes from other roads
     else{
-
+      cars[car_id].pos = std::min(cars[car_id].speed+cars[car_id].pos, lane1_last_pos[channelNo]-1);
+      cars[car_id].path.push_back(id);
+      cars[car_id].state = STOP;
     }
   }
 }
 
-//calculate how much time it will cost to reach the next cross if we add car:car_id to the road
-int Road::NewCarTime(int car_id){
+//calculate how much time it will cost to reach the next cross if we add car car_id to the road
+int Road::QueryRoadState(int car_id){
 
 }
 
