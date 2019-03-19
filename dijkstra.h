@@ -14,7 +14,8 @@ using std::priority_queue;
 
 class Graph{
  public:
-  Graph(const vector<Road>& roads, int vertex_num):vertex_num_(vertex_num){
+  Graph(const vector<Road>& roads, int vertex_num){
+    vertex_num_ = vertex_num;
     adj_matrix = vector<vector<int>>(vertex_num, vector<int>(vertex_num, INF));
     adj_matrix_reverse = vector<vector<int>>(vertex_num, vector<int>(vertex_num, INF));
     cost_matrix = vector<vector<int>>(vertex_num, vector<int>(vertex_num, INF));

@@ -1,7 +1,7 @@
 #ifndef CODECRAFTUTIL_H_
 #define CODECRAFTUTIL_H_
 
-// #define DEBUG
+#define DEBUG
 
 #define IN_GARAGE 0
 #define WAIT 1

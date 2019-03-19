@@ -3,8 +3,15 @@
 #include "dijkstra.h"
 #include <iomanip>
 #include <unordered_map>
+#include <algorithm>
 #include "codecraft_util.h"
-// #include "dispatch.h"
+#include "dispatch.h"
+#include <vector>
+#include <fstream>
+
+using std::ofstream;
+using std::vector;
+using std::priority_queue;
 using std::unordered_map;
 
 int main(int argc, char *argv[])
@@ -30,7 +37,7 @@ int main(int argc, char *argv[])
 	vector<Road> roads;
   vector<Cross> crosses;
   vector<Car> cars;
-  unordered_map<int, vector<int>> ready_cars;
+  unordered_map<int, priority_queue<int, vector<int>, std::greater<int>>> ready_cars;
 
   ReadData(carPath, crossPath, roadPath, cars, crosses, roads, ready_cars);
 
@@ -46,20 +53,20 @@ int main(int argc, char *argv[])
   #ifdef DEBUG
     for(int i=0; i<crosses.size(); i++){
       for(int j = 0; j<crosses.size(); j++){
-        if(cost_matrix[i][j] == INF){
+        if(graph.cost_matrix[i][j] == INF){
           std::cout<<std::setw(3)<<-1<<' ';
         }
-        else std::cout<<std::setw(3)<<cost_matrix[i][j]<<' ';
+        else std::cout<<std::setw(3)<<graph.cost_matrix[i][j]<<' ';
       }
       std::cout<<std::endl;
     }
     std::cout<<"parent matrix"<<std::endl;
     for(int i=0; i<crosses.size(); i++){
       for(int j = 0; j<crosses.size(); j++){
-        if(parent_maxtrix[i][j] == INF){
+        if(graph.parent_matrix[i][j] == INF){
           std::cout<<std::setw(3)<<-1<<' ';
         }
-        else std::cout<<std::setw(3)<<parent_maxtrix[i][j]<<' ';
+        else std::cout<<std::setw(3)<<graph.parent_matrix[i][j]<<' ';
       }
       std::cout<<std::endl;
     }
@@ -68,4 +75,20 @@ int main(int argc, char *argv[])
 	// TODO:write output file
 	
 	return 0;
+}
+
+void WriteAnswerFile(const vector<Car>& cars, const string& answer_path){
+  ofstream ofs(answer_path);
+  if(!ofs.good()){
+    std::cerr<<"open answer file failed"<<std::endl;
+  }
+  for(int i=0; i<cars.size; i++){
+    ofs<<'('<<carcount_id[cars[i].id]<<','<<cars[i].true_start_time<<',';
+    for(int j=0; j<cars[i].path.size(); j++){
+      ofs<<roadcount_id[cars[i].path[j]];
+      if(j != cars[i].path.size()-1) ofs<<','; 
+    }
+    ofs<<')'<<std::endl;
+  }
+  ofs.close();
 }

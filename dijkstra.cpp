@@ -28,18 +28,22 @@ void Graph::Dijkstra(const vector<Road>& roads, int start){
     flag[u] = 0;
 
     for(int j = 0; j<vertex_num_; j++){
-      if(adj_matrix_reverse[u][j] == INF) continue;
+      if(adj_matrix[u][j] == INF) continue;
       int cost_startu = min_dist;
-      int cost_uj = roads[adj_matrix_reverse[u][j]].length;
+      int cost_uj = roads[adj_matrix[u][j]].length;
       int cost_startj =cost_matrix[start][j];
       if(cost_startu+cost_uj < cost_startj){
         cost_matrix[start][j] = cost_startu + cost_uj;
         parent_matrix[u][j] = u;
         int v = u, last_v = u;
-        while(u != start && last_v!=start){
-          parent_matrix[v][j] = last_v;
-          last_v = v;
-          v = parent_matrix[start][v];
+        while(u!= start){
+          int tmp = start;
+          while(tmp != parent_matrix[tmp][v]){
+            tmp = parent_matrix[tmp][v];
+          }
+          parent_matrix[tmp][j] = v;
+          v = tmp;
+          if(tmp == start) break;
         }
       }
     }
