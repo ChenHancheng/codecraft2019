@@ -12,6 +12,7 @@ using std::set;
 using std::vector;
 using std::pair;
 
+int Cross::reached_cars = 0;
 //use static road state to generate an initial value for optimizer
 void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<vector<int>> cost_matrix){
   //clear the last time vaule;
@@ -26,8 +27,8 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
         else if(id == roads[dispatch_seq[i]].start && roads[dispatch_seq[i]].bidirectional == true){
           car_id = roads[dispatch_seq[i]].lane1[k][j];
         }
-        if(car_id != -1){
-            int direction;
+        if(car_id != -1 && cars[car_id].state==WAIT){
+            // int direction;
             int min_cost = INF;
             int next_road_id;
             for(int l=0; l<valid_roads_num; l++){
@@ -47,14 +48,16 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
               if(cost <min_cost){
                 next_road_id = road_id;
                 min_cost = cost;
-                direction = direction_tmp;
+                // direction = direction_tmp;
               }
             }
-            road_queue[dispatch_seq[i]].push(car_id);
             cars[car_id].next_road_id = next_road_id;
+            if(cars[car_id].current_road_id == next_road_id){
+              std::cerr<<"the initial value is wrong"<<std::endl;
+            }
+            road_queue[dispatch_seq[i]].push(car_id);
             // cars[car_id].direction = direction;
             // cars[car_id].channel = k;
-
           }
       }//end of for(0->channel)
     }

@@ -16,8 +16,8 @@ using std::string;
 using std::vector;
 using std::unordered_map;
 
-unordered_map<int, int> carcount_id;
-unordered_map<int, int> roadcount_id;
+extern unordered_map<int, int> carcount_id;
+extern unordered_map<int, int> roadcount_id;
 
 bool ReadRoad(const string& road_path, vector<RoadData>& roads_data);
 bool ReadCross(const string& cross_path,vector<CrossData>& cross_data);

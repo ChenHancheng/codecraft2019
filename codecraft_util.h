@@ -6,6 +6,7 @@
 #define IN_GARAGE 0
 #define WAIT 1
 #define STOP 2
+#define REACHED 3
 
 #define INF 0x3f3f3f3f
 

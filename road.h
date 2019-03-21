@@ -58,7 +58,7 @@ class Road {
   vector<int> lane1_last_car;
   vector<int> lane1_last_time;
   int cars_num_road;
-
+// int s;
   void RoadRun(vector<Car>& cars);
   void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane);
 
@@ -71,13 +71,14 @@ class Road {
                   vector<int>& lane_last_pos, vector<int>& lane_last_time);
   int AddCar(vector<Car>& cars, int car_id, int direction);
 
-  void UpdateCar(vector<Car>& cars, int car_id);
-  void UpdateCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
+  void UpdateCar(vector<Car>& cars, const int car_id);
+  void UpdateCarLane(vector<Car>& cars, const int car_id, vector<vector<int>>& lane,
                      vector<int>& lane_last_pos, vector<int>& lane_last_time);
 
-  void DeleteCar(vector<Car>& cars, int car_id);
-  void DeleteCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
-                     vector<int>& lane_last_pos, vector<int>& lane_last_time);
+void DeleteCar(vector<Car>& cars, int car_id);
+  // void DeleteCar(vector<Car>& cars, int car_id);
+  // void DeleteCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
+  //                    vector<int>& lane_last_pos, vector<int>& lane_last_time);
 
   void UpdateLastCar(const vector<Car>& cars){
     for(int i=0; i<lane0.size(); i++){

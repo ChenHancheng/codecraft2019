@@ -13,7 +13,7 @@ using std::ofstream;
 using std::vector;
 using std::priority_queue;
 using std::unordered_map;
-
+void WriteAnswerFile(const vector<Car>& cars, const string& answer_path);
 int main(int argc, char *argv[])
 {
     std::cout << "Begin" << std::endl;
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 
   Dispatch(cars, roads, crosses, graph, ready_cars);
 
+  WriteAnswerFile(cars, answerPath);
   #ifdef DEBUG
     for(int i=0; i<crosses.size(); i++){
       for(int j = 0; j<crosses.size(); j++){
@@ -82,7 +83,7 @@ void WriteAnswerFile(const vector<Car>& cars, const string& answer_path){
   if(!ofs.good()){
     std::cerr<<"open answer file failed"<<std::endl;
   }
-  for(int i=0; i<cars.size; i++){
+  for(int i=0; i<cars.size(); i++){
     ofs<<'('<<carcount_id[cars[i].id]<<','<<cars[i].true_start_time<<',';
     for(int j=0; j<cars[i].path.size(); j++){
       ofs<<roadcount_id[cars[i].path[j]];

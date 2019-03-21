@@ -24,7 +24,6 @@ class Car {
         plan_time(car_data.plan_time) {
     state = IN_GARAGE;
         }
-  Car()=default;
   int true_start_time;
   int pos;
   int state;
