@@ -28,7 +28,6 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
           car_id = roads[dispatch_seq[i]].lane1[k][j];
         }
         if(car_id != -1 && cars[car_id].state==WAIT){
-            // int direction;
             int min_cost = INF;
             int next_road_id;
             for(int l=0; l<valid_roads_num; l++){
@@ -48,7 +47,7 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
               if(cost <min_cost){
                 next_road_id = road_id;
                 min_cost = cost;
-                // direction = direction_tmp;
+                roads[next_road_id].max_car_num;
               }
             }
             cars[car_id].next_road_id = next_road_id;
@@ -56,12 +55,50 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
               std::cerr<<"the initial value is wrong"<<std::endl;
             }
             road_queue[dispatch_seq[i]].push(car_id);
-            // cars[car_id].direction = direction;
-            // cars[car_id].channel = k;
           }
       }//end of for(0->channel)
     }
   }
+}
+
+int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
+  bool launch_flag = false;
+  int update_res;
+  if(cars[car_id].state == IN_GARAGE){
+    int next_road_id = cars[car_id].next_road_id;
+    update_res = roads[next_road_id].AddCar(cars, car_id, cars[car_id].direction);
+    launch_flag = true;
+  }
+  else if(cars[car_id].state == WAIT){
+      int s1 = cars[car_id].pos;
+      int v2 = min(roads[cars[car_id].next_road_id].speed_limit, cars[car_id].speed);
+      int cur_road_id = cars[car_id].current_road_id;
+      int next_road_id = cars[car_id].next_road_id;
+      if(s1<min(cars[car_id].speed, roads[cur_road_id].speed_limit) && cars[car_id].end == id){ // the car reach goal
+        cars[car_id].state = REACHED;
+        reached_cars++;
+        roads[cur_road_id].DeleteCar(cars, car_id);
+        return ADD_SUCCESS; //TO_DO:change ADD_SUCCESS to UPDATE_SUCCESS seems more reasonable
+      }
+      if(s1>=v2 || (cars[car_id].pos != 0 && cars[car_id].direction == 0 && roads[cur_road_id].lane0[cars[car_id].channel][0]!=POS_BLANK) 
+          || (cars[car_id].pos != 0 && cars[car_id].direction == 1 && roads[cur_road_id].lane1[cars[car_id].channel][0]!=POS_BLANK)){
+        roads[cur_road_id].UpdateCar(cars, car_id);
+      }
+      else{
+        int direction;
+        if(id == roads[next_road_id].start) direction = 0;
+        else direction = 1;
+        update_res = roads[next_road_id].AddCar(cars, car_id, direction);
+        if(update_res == NEXT_ROAD_FULL){
+          roads[cur_road_id].UpdateCar(cars, car_id);
+        }
+        if(update_res == ADD_SUCCESS) roads[cur_road_id].DeleteCar(cars, car_id);
+      }
+    
+  }
+  if(update_res != FRONT_CAR_WAIT) cars[car_id].state = STOP;
+  if(update_res != ADD_SUCCESS && launch_flag == true) cars[car_id].state = IN_GARAGE;
+  return update_res;
 }
 
 void Cross::CalCost(){

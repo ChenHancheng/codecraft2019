@@ -4,20 +4,22 @@
 #include <algorithm>
 #include <queue>
 #include <vector>
+#include <ostream>
+#include <iomanip>
 
 #include "car.h"
 #include "codecraft_util.h"
 #include "data_type.h"
 
 #define POS_BLANK -1
-#define POS_OCCUPATION 1
 
 #define ADD_SUCCESS 0
 #define FRONT_CAR_WAIT 1
 #define NEXT_ROAD_FULL 2
+
+using std::min;
 using std::priority_queue;
 using std::vector;
-using std::min;
 
 class Road {
  public:
@@ -49,16 +51,14 @@ class Road {
   }
 
   vector<vector<int>> lane0;
-  // priority_queue<int> lane0_wait;
   vector<int> lane0_last_car;
   vector<int> lane0_last_time;
 
   vector<vector<int>> lane1;
-  // priority_queue<int> lane1_wait;
   vector<int> lane1_last_car;
   vector<int> lane1_last_time;
   int cars_num_road;
-// int s;
+
   void RoadRun(vector<Car>& cars);
   void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane);
 
@@ -68,49 +68,39 @@ class Road {
   int QueryRoadState(vector<Car>& cars, int car_id, int direction);
 
   int AddCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
-                  vector<int>& lane_last_pos, vector<int>& lane_last_time);
+                 vector<int>& lane_last_pos, vector<int>& lane_last_time);
   int AddCar(vector<Car>& cars, int car_id, int direction);
 
   void UpdateCar(vector<Car>& cars, const int car_id);
-  void UpdateCarLane(vector<Car>& cars, const int car_id, vector<vector<int>>& lane,
-                     vector<int>& lane_last_pos, vector<int>& lane_last_time);
+  void UpdateCarLane(vector<Car>& cars, const int car_id,
+                     vector<vector<int>>& lane, vector<int>& lane_last_pos,
+                     vector<int>& lane_last_time);
 
-void DeleteCar(vector<Car>& cars, int car_id);
+  void DeleteCar(vector<Car>& cars, int car_id);
   // void DeleteCar(vector<Car>& cars, int car_id);
-  // void DeleteCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
-  //                    vector<int>& lane_last_pos, vector<int>& lane_last_time);
-
-  void UpdateLastCar(const vector<Car>& cars){
-    for(int i=0; i<lane0.size(); i++){
-      int j=0;
-      for(j=0; j<length; j++){
-        if(lane0[i][length-j-1] != POS_BLANK){
-          lane0_last_car[i] = lane0[i][length-j-1];
-          int car_id = lane0[i][length-j-1];
-          lane0_last_time[i] = cars[car_id].pos/cars[car_id].speed;
-          break;
-        }
-      }
-      if(j == length){
-        lane0_last_car[i] = POS_BLANK;
-        lane0_last_time[i] = 0;
-      }
-    }
-    for(int i=0; i<lane1.size(); i++){
-      int j;
-      for(j=0; j<length; j++){
-        if(lane1[i][length-1-j] != POS_BLANK){
-          lane1_last_car[i] = lane1[i][length-j-1];
-          int car_id = lane1[i][length-j-1];
-          lane1_last_time[i] = cars[car_id].pos/cars[car_id].speed;
-          break;
-        }
-      }
-      if(j == length){
-        lane1_last_car[i] = POS_BLANK;
-        lane1_last_time[i] = 0;
-      }
-    }
-  }
+  // void DeleteCarLane(vector<Car>& cars, int car_id, vector<vector<int>>&
+  // lane,
+  //                    vector<int>& lane_last_pos, vector<int>&
+  //                    lane_last_time);
+  void UpdateLastCar(const vector<Car>& cars);
 };
+
+inline std::ostream& operator<<(std::ostream& ouput, Road road){
+  // std<<cout
+  for(int i=0; i<road.channel; i++){
+    for(int j = 0; j< road.length; j++)
+    {
+      std::cout<<std::setw(6)<<road.lane0[i][j];
+    }
+    std::cout<<std::endl;
+  }
+  std::cout<<std::endl;
+  for(int i=0; i<road.channel; i++){
+    for(int j = 0; j< road.length; j++)
+    {
+      std::cout<<std::setw(6)<<road.lane1[i][j];
+    }
+    std::cout<<std::endl;
+  }
+}
 #endif  // ROAD_H_
