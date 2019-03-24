@@ -16,8 +16,10 @@ int Road::AddCar(vector<Car>& cars, int car_id, int direction) {
   int status;
   if (direction == 0) {
     status = AddCarLane(cars, car_id, lane0, lane0_last_car, lane0_last_time);
+    if(status == ADD_SUCCESS) cars_num_road0++;
   } else {
     status = AddCarLane(cars, car_id, lane1, lane1_last_car, lane1_last_time);
+    if(status == ADD_SUCCESS) cars_num_road1++;
   }
   if (status == ADD_SUCCESS) cars[car_id].direction = direction;
   UpdateLastCar(cars);
@@ -30,7 +32,10 @@ int Road::AddCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
   while (channelNo < channel && lane[channelNo].back() != POS_BLANK) {
     channelNo++;
   }
-  if (channelNo == channel) return NEXT_ROAD_FULL;
+  if (channelNo == channel){
+    if(cars[lane[channelNo-1].back()].state == WAIT) return FRONT_CAR_WAIT;
+    else return NEXT_ROAD_FULL;
+  } 
 
   int pos_tmp =
       length - (min(cars[car_id].speed, speed_limit) - cars[car_id].pos);
@@ -127,11 +132,13 @@ void Road::DeleteCar(vector<Car>& cars, int car_id) {
     for (int j = 0; j < length; j++) {
       if (lane0[i][j] == car_id) {
         lane0[i][j] = POS_BLANK;
+        cars_num_road0--;
         UpdateLastCar(cars);
         return;
       }
       if (bidirectional == true && lane1[i][j] == car_id) {
         lane1[i][j] = POS_BLANK;
+        cars_num_road1--;
         UpdateLastCar(cars);
         return;
       }

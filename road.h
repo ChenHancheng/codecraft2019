@@ -40,6 +40,7 @@ class Road {
         start(road_data.start),
         end(road_data.end),
         bidirectional(road_data.bidirectional) {
+    max_car_num = channel*length;
     lane0 = vector<vector<int>>(channel, vector<int>(length, POS_BLANK));
     lane0_last_car = vector<int>(channel, -1);
     lane0_last_time = vector<int>(channel, -1);
@@ -53,11 +54,14 @@ class Road {
   vector<vector<int>> lane0;
   vector<int> lane0_last_car;
   vector<int> lane0_last_time;
+  int cars_num_road0=0;
 
   vector<vector<int>> lane1;
   vector<int> lane1_last_car;
   vector<int> lane1_last_time;
-  int cars_num_road;
+  int cars_num_road1=0;
+
+  int max_car_num;
 
   void RoadRun(vector<Car>& cars);
   void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane);

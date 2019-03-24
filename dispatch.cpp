@@ -31,14 +31,19 @@ void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Gr
     for(int i=0; i<crosses_num; i++){
      crosses[i].InitialValue(roads, cars, graph.cost_matrix);
     }
+    StateShow(roads, crosses, cars);
     //tabu(cars, roads, crossed, solution);
     RecordSolution(cars, roads, crosses);
+    // StateShow(roads, crosses, cars);
+
     if(Cross::reached_cars == cars.size()){
       std::cout<<"all cars reached"<<std::endl;
       std::cout<<"total cost "<<T_count <<" time"<<std::endl;
       break;
     }
     LaunchCar(T_count, cars, crosses, ready_cars, roads, graph);
+    //StateShow(roads, crosses, cars);
+
     std::cout<<T_count<<":Total "<< Cross::reached_cars<<"cars reached "<<std::endl;
     T_count++;
   }

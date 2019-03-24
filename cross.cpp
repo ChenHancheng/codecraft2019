@@ -36,18 +36,20 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
               int cost;
               int direction_tmp;
               int cross_id = roads[road_id].start==id?roads[road_id].end:roads[road_id].start;
+              int ratio;
               if(roads[road_id].start == id){
                 direction_tmp = 0;
+                ratio = (8*roads[road_id].cars_num_road0/roads[id].max_car_num);
               }
               else{
                 direction_tmp = 1;
+                ratio = (8*roads[road_id].cars_num_road1/roads[id].max_car_num);
                 if(roads[road_id].bidirectional == false) continue;
               }
-              cost = roads[road_id].QueryRoadState(cars, car_id, direction_tmp) + cost_matrix[cross_id][cars[car_id].end]/cars[car_id].speed;
+              cost = roads[road_id].QueryRoadState(cars, car_id, direction_tmp) + cost_matrix[cross_id][cars[car_id].end]/cars[car_id].speed+ratio;
               if(cost <min_cost){
                 next_road_id = road_id;
                 min_cost = cost;
-                roads[next_road_id].max_car_num;
               }
             }
             cars[car_id].next_road_id = next_road_id;
