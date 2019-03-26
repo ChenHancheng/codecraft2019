@@ -10,12 +10,12 @@ include_directories(${PROJECT_SOURCE_DIR}/lib)
 # 设置可执行文件生成路径
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 
-find_package(OpenCV REQUIRED)
-include_directories(
-    ${OpenCV_INCLUDE_DIRS}
-)
+# find_package(OpenCV REQUIRED)
+# include_directories(
+#    ${OpenCV_INCLUDE_DIRS}
+# )
 # 生成debug版本
-#SET(CMAKE_BUILD_TYPE "release")
+# SET(CMAKE_BUILD_TYPE "release")
 SET(CMAKE_BUILD_TYPE "debug")
 
 if (CMAKE_BUILD_TYPE STREQUAL debug)
@@ -32,5 +32,5 @@ aux_source_directory(. DIR_SRCS)
 add_executable(CodeCraft-2019 
 ${DIR_SRCS}
 )
-target_link_libraries(CodeCraft-2019 
-${OpenCV_LIBS})
+# target_link_libraries(CodeCraft-2019 
+# ${OpenCV_LIBS})

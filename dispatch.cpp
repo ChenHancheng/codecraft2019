@@ -10,7 +10,7 @@
 #include "car.h"
 #include "dijkstra.h"
 #include "dispatch.h"
-#include "gui.h"
+//  #include "gui.h"
 
 using std::priority_queue;
 using std::unordered_map;
@@ -31,20 +31,21 @@ void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Gr
     for(int i=0; i<crosses_num; i++){
      crosses[i].InitialValue(roads, cars, graph.cost_matrix);
     }
-    StateShow(roads, crosses, cars);
+    // StateShow(roads, crosses, cars);
     //tabu(cars, roads, crossed, solution);
     RecordSolution(cars, roads, crosses);
     // StateShow(roads, crosses, cars);
 
+    LaunchCar(T_count, cars, crosses, ready_cars, roads, graph);
+    //StateShow(roads, crosses, cars);
     if(Cross::reached_cars == cars.size()){
       std::cout<<"all cars reached"<<std::endl;
       std::cout<<"total cost "<<T_count <<" time"<<std::endl;
       break;
     }
-    LaunchCar(T_count, cars, crosses, ready_cars, roads, graph);
-    //StateShow(roads, crosses, cars);
-
+// #ifdef DEBUG
     std::cout<<T_count<<":Total "<< Cross::reached_cars<<"cars reached "<<std::endl;
+// #endif
     T_count++;
   }
 }
@@ -83,16 +84,46 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
 //     roads[i] = road_tmp[i];
 //   }
 // }
-void DealDealLock(const vector<int>& wait_list){
+void DealDealLock(vector<int>& wait_list, vector<Cross>& crosses, vector<Car>& cars, vector<Road>& roads){
   bool dead_lock_flag = false;
+  int loop_id;
   for(int i = 0; i<wait_list.size() && !dead_lock_flag; i++){
     int slow = i, fast = i;
     while(wait_list[fast]!=-1 && wait_list[wait_list[fast]] != -1){
       slow = wait_list[slow];
       fast = wait_list[wait_list[fast]];
       if(slow == fast){
+        // WriteMapImg(roads, crosses, cars);
         dead_lock_flag = true;
+  // #ifdef DEBUG
         std::cout<<"dead lock happeds"<<std::endl;
+  // #endif
+        loop_id = slow;
+        break;
+      }
+    }
+  }
+  if(dead_lock_flag == false) return;
+  while(crosses[loop_id].valid_roads_num <= 2){
+    loop_id = wait_list[loop_id];
+  }
+  wait_list[loop_id] = -1;
+  int car_id = 0;
+  for(int j = 0; j<crosses[loop_id].valid_roads_num; j++){ // find the first not empty road
+    if(crosses[loop_id].road_queue[crosses[loop_id].dispatch_seq[j]].empty() == false){
+      car_id = crosses[loop_id].road_queue[crosses[loop_id].dispatch_seq[j]].front();
+      break;
+    }
+  }
+  
+  for(int j= 0; j<crosses[loop_id].valid_roads_num; j++){
+    if(crosses[loop_id].dispatch_seq[j] != cars[car_id].next_road_id && crosses[loop_id].dispatch_seq[j] != cars[car_id].current_road_id){
+      if(loop_id == roads[crosses[loop_id].dispatch_seq[j]].start){
+          cars[car_id].next_road_id = crosses[loop_id].dispatch_seq[j];
+          // break;
+      }//end of if
+      else if(loop_id == roads[crosses[loop_id].dispatch_seq[j]].end && roads[crosses[loop_id].dispatch_seq[j]].bidirectional == true){
+        cars[car_id].next_road_id = crosses[loop_id].dispatch_seq[j];
         // break;
       }
     }
@@ -132,7 +163,9 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
             // wait_list[i] = -1;
             crosses[i].road_queue[cur_road_id].pop();
           }
+  #ifdef DEBUG
           else std::cerr<<"it seems some errors occur"<<std::endl;
+  #endif
       }
       else if(direction == TURN_LEFT){ // if the car needs to turn left, we need check wether there are other cars need to go straight
         int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
@@ -158,7 +191,9 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
             // wait_list[i] = -1;
             crosses[i].road_queue[cur_road_id].pop();
           }
+  #ifdef DEBUG
           else std::cerr<<"it seems some errors occur"<<std::endl;
+  #endif
         } 
       }
       else{ // if the car needs to turn left, we need check wether there are car need to go straight or left
@@ -195,7 +230,9 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
               // wait_list[i] = -1;
               crosses[i].road_queue[cur_road_id].pop();
             }
+  #ifdef DEBUG
             else std::cerr<<"it seems some errors occur"<<std::endl;
+  #endif
           }
         }
         int test_flag = false;
@@ -226,8 +263,11 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
             }
             if(test_flag == true) break;
     }//end for while(cross_finish_flag[i] == false)
-    DealDealLock(wait_list);
     i = (i+1)%crosses.size();
+    if(i == crosses.size()-1) {
+      DealDealLock(wait_list, crosses, cars, roads);
+      wait_list = vector<int>(crosses.size(), -1);
+    }
     int m = 0;
     for(m=0; m<crosses.size(); m++){
       if(cross_finish_flag[m] != true){
