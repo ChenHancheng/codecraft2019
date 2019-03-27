@@ -25,6 +25,7 @@ class Car {
     state = IN_GARAGE;
         }
   int true_start_time;
+  int end_time;
   int pos;
   int state;
   int next_road_id;

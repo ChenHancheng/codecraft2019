@@ -53,6 +53,10 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
               }
             }
             cars[car_id].next_road_id = next_road_id;
+            if(id == cars[car_id].end) 
+            {
+              cars[car_id].next_road_id = cars[car_id].current_road_id;
+            }
             if(cars[car_id].current_road_id == next_road_id){
               std::cerr<<"the initial value is wrong"<<std::endl;
             }
@@ -65,7 +69,7 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
 
 int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
   bool launch_flag = false;
-  int update_res;
+  int update_res = ADD_SUCCESS;
   if(cars[car_id].state == IN_GARAGE){
     int next_road_id = cars[car_id].next_road_id;
     update_res = roads[next_road_id].AddCar(cars, car_id, cars[car_id].direction);
@@ -99,7 +103,13 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
     
   }
   if(update_res != FRONT_CAR_WAIT) cars[car_id].state = STOP;
-  if(update_res != ADD_SUCCESS && launch_flag == true) cars[car_id].state = IN_GARAGE;
+  if(update_res == FRONT_CAR_WAIT && launch_flag == true){
+    cars[car_id].state = IN_GARAGE;
+    std::cout<<"111111111111111111111111111111111111"<<std::endl;
+  } 
+  if(update_res == NEXT_ROAD_FULL && launch_flag == true){
+    cars[car_id].state = IN_GARAGE;
+  } 
   return update_res;
 }
 
@@ -128,6 +138,10 @@ Cross::Cross(const CrossData& cross_data):id(cross_data.id){
 
   sort(dispatch_seq.begin(), dispatch_seq.end());
   valid_roads_num = dispatch_seq.size();
+  turn_direction.insert({{road_id0, road_id0}, GO_STRAIGHT});
+  turn_direction.insert({{road_id1, road_id1}, GO_STRAIGHT});
+  turn_direction.insert({{road_id2, road_id2}, GO_STRAIGHT});
+  turn_direction.insert({{road_id3, road_id3}, GO_STRAIGHT});
 
   turn_direction.insert({{road_id0, road_id2}, GO_STRAIGHT});
   turn_direction.insert({{road_id2, road_id0}, GO_STRAIGHT});

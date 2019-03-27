@@ -77,8 +77,7 @@ class Road {
 
   void UpdateCar(vector<Car>& cars, const int car_id);
   void UpdateCarLane(vector<Car>& cars, const int car_id,
-                     vector<vector<int>>& lane, vector<int>& lane_last_pos,
-                     vector<int>& lane_last_time);
+                     vector<vector<int>>& lane);
 
   void DeleteCar(vector<Car>& cars, int car_id);
   // void DeleteCar(vector<Car>& cars, int car_id);
