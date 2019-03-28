@@ -10,7 +10,7 @@
 #include "car.h"
 #include "dijkstra.h"
 #include "dispatch.h"
-// #include "gui.h"
+#include "gui.h"
 
 using std::priority_queue;
 using std::unordered_map;
@@ -63,7 +63,7 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
     cars[car_id].true_start_time = T_count;
     cars[car_id].pos = 0;
     int update_status = -1;
-    if(max_car_number<15){
+    if(max_car_number<16){
       update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
     }
     if(update_status == ADD_SUCCESS) {
@@ -149,9 +149,11 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
         while(crosses[i].road_queue[cur_road_id].empty() == false){
               // && road_wait_flag[crosses[i].dispatch_seq[j]] == false){ //if current cross is not complete
           cur_car_id = crosses[i].road_queue[cur_road_id].front();
-          if(T_count > 400 && (i == 44 || i == 45)){
-            // std::cout<<"cross_id"<<i<<", j:"<<j<<std::endl;
+          if(T_count > 400 && (i == 30)){
+            // std::cout<<"cross_id:"<<i<<", j:"<<j<<std::endl;
             // std::cout<<"road speed:"<<roads[cur_road_id].speed_limit<<std::endl;
+            // std::cout<<"next road speed:"<<roads[cars[cur_car_id].next_road_id].speed_limit<<std::endl;
+
             // std::cout<<"cur_car_id:"<<cur_car_id<<std::endl;
             // std::cout<<"cur_car_id channel:"<<cars[cur_car_id].channel<<std::endl;
             // std::cout<<"cur_car_id pos:"<<cars[cur_car_id].pos<<std::endl;
@@ -185,7 +187,7 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
           }
           else if(direction == TURN_LEFT){ // if the car needs to turn left, we need check wether there are other cars need to go straight
             int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
-            road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_RIGHT}];
+            road_id_tmp = crosses[i].turn_road[{cur_road_id, TURN_RIGHT}];
             if(crosses[i].road_queue.count(road_id_tmp)>0 && crosses[i].road_queue[road_id_tmp].empty() == false){//&& road_wait_flag[road_id_tmp] == false){
               car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
               if(cars[car_id_tmp].state == STOP) std::cout<<"asdjfsaf";
@@ -212,14 +214,14 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
           }
           else{ // if the car needs to turn left, we need check wether there are car need to go straight or left
             int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
-            road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_LEFT}];
+            road_id_tmp = crosses[i].turn_road[{cur_road_id, TURN_LEFT}];
             if(crosses[i].road_queue.count(road_id_tmp)>0 && crosses[i].road_queue[road_id_tmp].empty() == false){ //&& road_wait_flag[road_id_tmp] == false){
               car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
               if(cars[car_id_tmp].state == STOP) std::cout<<"asdjfsaf";
               direction_tmp = crosses[i].turn_direction[{cars[car_id_tmp].current_road_id, cars[car_id_tmp].next_road_id}];
             }
             int road_id_tmp1=-1, car_id_tmp1 =-1, direction_tmp1 = -1;
-            road_id_tmp1 = crosses[i].turn_road[{cars[cur_car_id].current_road_id, GO_STRAIGHT}];
+            road_id_tmp1 = crosses[i].turn_road[{cur_road_id, GO_STRAIGHT}];
             if(crosses[i].road_queue.count(road_id_tmp1)>0 && crosses[i].road_queue[road_id_tmp1].empty() == false){ //&& road_wait_flag[road_id_tmp1] == false){
               car_id_tmp1 = crosses[i].road_queue[road_id_tmp1].front();
               if(cars[car_id_tmp1].state == STOP) std::cout<<"asdjfsaf";

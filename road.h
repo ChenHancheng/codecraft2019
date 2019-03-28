@@ -66,7 +66,7 @@ class Road {
   void RoadRun(vector<Car>& cars);
   void RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane);
 
-  int QueryRoadStateLane(vector<Car>& cars, int car_id,
+  int QueryRoadStateLane(const vector<Car>& cars, int car_id,
                          vector<vector<int>>& lane, vector<int>& lane_last_pos,
                          vector<int>& lane_last_time);
   int QueryRoadState(vector<Car>& cars, int car_id, int direction);
