@@ -72,7 +72,7 @@ class Road {
   int QueryRoadState(vector<Car>& cars, int car_id, int direction);
 
   int AddCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
-                 vector<int>& lane_last_pos, vector<int>& lane_last_time);
+                 vector<int>& lane_last_pos);
   int AddCar(vector<Car>& cars, int car_id, int direction);
 
   void UpdateCar(vector<Car>& cars, const int car_id);
@@ -107,5 +107,7 @@ inline std::ostream& operator<<(std::ostream& ouput, Road road){
     }
     std::cout<<std::endl;
   }
+    std::cout<<std::endl;  std::cout<<std::endl;
+  return ouput;
 }
 #endif  // ROAD_H_

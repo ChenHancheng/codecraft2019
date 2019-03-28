@@ -15,10 +15,10 @@ using std::vector;
 int Road::AddCar(vector<Car>& cars, int car_id, int direction) {
   int status;
   if (direction == 0) {
-    status = AddCarLane(cars, car_id, lane0, lane0_last_car, lane0_last_time);
+    status = AddCarLane(cars, car_id, lane0, lane0_last_car);
     if(status == ADD_SUCCESS) cars_num_road0++;
   } else {
-    status = AddCarLane(cars, car_id, lane1, lane1_last_car, lane1_last_time);
+    status = AddCarLane(cars, car_id, lane1, lane1_last_car);
     if(status == ADD_SUCCESS) cars_num_road1++;
   }
   if (status == ADD_SUCCESS) cars[car_id].direction = direction;
@@ -27,15 +27,14 @@ int Road::AddCar(vector<Car>& cars, int car_id, int direction) {
 }
 
 int Road::AddCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
-                     vector<int>& lane_last_car, vector<int>& lane_last_time) {
+                     vector<int>& lane_last_car) {
   int channelNo = 0;
   while (channelNo < channel && lane[channelNo].back() != POS_BLANK) {
     channelNo++;
     if(cars[lane[channelNo-1].back()].state == WAIT) return FRONT_CAR_WAIT;
   }
   if (channelNo == channel){
-    if(cars[lane[channelNo-1].back()].state == WAIT) return FRONT_CAR_WAIT;
-    else return NEXT_ROAD_FULL;
+    return NEXT_ROAD_FULL;
   } 
 
   int pos_tmp =
@@ -48,6 +47,7 @@ int Road::AddCarLane(vector<Car>& cars, int car_id, vector<vector<int>>& lane,
     return FRONT_CAR_WAIT;
   }
   if (lane_last_car[channelNo] != POS_BLANK) {
+    if(cars[lane_last_car[channelNo]].state != STOP && pos_tmp <= cars[lane_last_car[channelNo]].pos ) std::cout<<"some thing wrong";
     cars[car_id].pos = max(pos_tmp, cars[lane_last_car[channelNo]].pos + 1);
   } else
     cars[car_id].pos = pos_tmp;
@@ -93,6 +93,7 @@ int Road::QueryRoadStateLane(vector<Car>& cars, int car_id,
 
 // update the car which is in WAIT status but will not pass the next cross
 void Road::UpdateCar(vector<Car>& cars, const int car_id) {
+  if(cars[car_id].state != WAIT) std::cout<<"asdfsadkfhasdfh"<<std::endl;
   if (cars[car_id].direction == 0) {
     UpdateCarLane(cars, car_id, lane0);
   } else {
@@ -156,6 +157,7 @@ void Road::DeleteCar(vector<Car>& cars, int car_id) {
       if (lane0[i][j] == car_id) {
         lane0[i][j] = POS_BLANK;
         cars_num_road0--;
+        if(cars_num_road0 < 0) std::cout<<"the number of cars on road is wrong"<<std::endl;
         UpdateChannelLane(cars, lane0, i);
         UpdateLastCar(cars);
         return;
@@ -163,6 +165,7 @@ void Road::DeleteCar(vector<Car>& cars, int car_id) {
       if (bidirectional == true && lane1[i][j] == car_id) {
         lane1[i][j] = POS_BLANK;
         cars_num_road1--;
+        if(cars_num_road1 < 0) std::cout<<"the number of cars on road is wrong"<<std::endl;
         UpdateChannelLane(cars, lane1, i);
         UpdateLastCar(cars);
         return;
@@ -181,35 +184,36 @@ void Road::UpdateChannel(vector<Car>& cars, int channel, int direction){
   }
 }
 
-void Road::UpdateChannelLane(vector<Car>& cars,vector<vector<int>>& lane, int channel){
+void Road::UpdateChannelLane(vector<Car>& cars,vector<vector<int>>& lane, int channelNo){
   int first_car_id = -1;
   for(int i=0; i<length; i++){
-    if(lane[channel][i] != POS_BLANK){
-      first_car_id = lane[channel][i];
+    if(lane[channelNo][i] != POS_BLANK){
+      first_car_id = lane[channelNo][i];
+      break;
     }
-    if(first_car_id = -1 || cars[first_car_id].state == STOP){
+  }
+  if(first_car_id == -1 || cars[first_car_id].state == STOP){
+    return;
+  }
+  else{
+    if(cars[first_car_id].pos<min(speed_limit, cars[first_car_id].speed)){
       return;
     }
     else{
-      if(cars[first_car_id].pos<=min(speed_limit, cars[first_car_id].speed)){
-        return;
-      }
-      else{
-        int front_car_pos = -1;
-        for(int j = cars[first_car_id].pos; j<length; j++){
-          if(lane[channel][j] != POS_BLANK){
-            int cur_car_id = lane[channel][j];
-            if(cars[cur_car_id].state == WAIT){
-              lane[cars[cur_car_id].channel][cars[cur_car_id].pos] = POS_BLANK;
-              cars[cur_car_id].pos -= min(cars[cur_car_id].speed, speed_limit);
-              cars[cur_car_id].pos = max(cars[cur_car_id].pos, front_car_pos + 1);
-              if(cars[cur_car_id].pos<0 || cars[cur_car_id].pos>=length){
-                std::cout<<"some thing wrong happened when update car"<<std::endl;
-              }
-              cars[cur_car_id].state = STOP;
-              lane[cars[cur_car_id].channel][cars[cur_car_id].pos] = cur_car_id;
-              front_car_pos = cars[cur_car_id].pos;
+      int front_car_pos = -1;
+      for(int j = cars[first_car_id].pos; j<length; j++){
+        if(lane[channelNo][j] != POS_BLANK){
+          int cur_car_id = lane[channelNo][j];
+          if(cars[cur_car_id].state == WAIT){
+            lane[channelNo][cars[cur_car_id].pos] = POS_BLANK;
+            cars[cur_car_id].pos -= min(cars[cur_car_id].speed, speed_limit);
+            cars[cur_car_id].pos = max(cars[cur_car_id].pos, front_car_pos + 1);
+            if(cars[cur_car_id].pos<0 || cars[cur_car_id].pos>=length){
+              std::cout<<"some thing wrong happened when update car"<<std::endl;
             }
+            cars[cur_car_id].state = STOP;
+            lane[channelNo][cars[cur_car_id].pos] = cur_car_id;
+            front_car_pos = cars[cur_car_id].pos;
           }
         }
       }
@@ -228,12 +232,12 @@ void Road::RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane) {
     int front_car_id = -1;
     for (int j = 0; j < length; j++) {
       int car_id = lane[i][j];
-      if (car_id != -1) {
+      if (car_id != POS_BLANK) {
         int max_speed = min(cars[car_id].speed, speed_limit);
         if (front_car_id == -1) {  // if this car is the first car in the lane
           if (j >= max_speed) {
+            cars[car_id].pos = j - max_speed;
             cars[car_id].state = STOP;
-            cars[car_id].pos = cars[car_id].pos - max_speed;
 
             lane[i][j] = POS_BLANK;
             lane[i][cars[car_id].pos] = car_id;
@@ -253,13 +257,16 @@ void Road::RoadRunLane(vector<Car>& cars, vector<vector<int>>& lane) {
               cars[car_id].state = WAIT;
             }
           }
-          if (cars[front_car_id].state == STOP) {
+          else if (cars[front_car_id].state == STOP) {
             cars[car_id].pos =
                 std::max(j - max_speed, cars[front_car_id].pos + 1);
             cars[car_id].state = STOP;
 
             lane[i][j] = POS_BLANK;
             lane[i][cars[car_id].pos] = car_id;
+          }
+          else {
+            std::cout<<"asdfasdl";
           }
         }
         front_car_id = car_id;
@@ -285,7 +292,7 @@ void Road::UpdateLastCar(const vector<Car>& cars) {
     }
   }
   for (int i = 0; i < lane1.size(); i++) {
-    int j;
+    int j = 0;
     for (j = 0; j < length; j++) {
       if (lane1[i][length - 1 - j] != POS_BLANK) {
         lane1_last_car[i] = lane1[i][length - j - 1];

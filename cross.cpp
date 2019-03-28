@@ -73,7 +73,10 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
   if(cars[car_id].state == IN_GARAGE){
     int next_road_id = cars[car_id].next_road_id;
     update_res = roads[next_road_id].AddCar(cars, car_id, cars[car_id].direction);
-    launch_flag = true;
+    if(update_res == NEXT_ROAD_FULL && launch_flag == true){
+      cars[car_id].state = IN_GARAGE;
+    }
+    return update_res;
   }
   else if(cars[car_id].state == WAIT){
       int s1 = cars[car_id].pos;
@@ -86,9 +89,11 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
         roads[cur_road_id].DeleteCar(cars, car_id);
         return ADD_SUCCESS; //TO_DO:change ADD_SUCCESS to UPDATE_SUCCESS seems more reasonable
       }
-      if(s1>=v2 || (cars[car_id].pos != 0 && cars[car_id].direction == 0 && roads[cur_road_id].lane0[cars[car_id].channel][0]!=POS_BLANK) 
-          || (cars[car_id].pos != 0 && cars[car_id].direction == 1 && roads[cur_road_id].lane1[cars[car_id].channel][0]!=POS_BLANK)){
+      // if(s1>=v2 || (cars[car_id].pos != 0 && cars[car_id].direction == 0 && roads[cur_road_id].lane0[cars[car_id].channel][0]!=POS_BLANK) 
+      //     || (cars[car_id].pos != 0 && cars[car_id].direction == 1 && roads[cur_road_id].lane1[cars[car_id].channel][0]!=POS_BLANK)){
+      if(s1>=v2){
         roads[cur_road_id].UpdateCar(cars, car_id);
+        return ADD_SUCCESS;
       }
       else{
         int direction;
@@ -97,20 +102,22 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
         update_res = roads[next_road_id].AddCar(cars, car_id, direction);
         if(update_res == NEXT_ROAD_FULL){
           roads[cur_road_id].UpdateCar(cars, car_id);
+          return ADD_SUCCESS;
+          // return FRONT_CAR_WAIT;
         }
-        if(update_res == ADD_SUCCESS) roads[cur_road_id].DeleteCar(cars, car_id);
+        else if(update_res == ADD_SUCCESS){
+          roads[cur_road_id].DeleteCar(cars, car_id);
+          cars[car_id].state = STOP;
+          return ADD_SUCCESS;
+        }
+        else
+        {
+          return FRONT_CAR_WAIT;
+        }
+        
       }
     
   }
-  if(update_res != FRONT_CAR_WAIT) cars[car_id].state = STOP;
-  if(update_res == FRONT_CAR_WAIT && launch_flag == true){
-    cars[car_id].state = IN_GARAGE;
-    std::cout<<"111111111111111111111111111111111111"<<std::endl;
-  } 
-  if(update_res == NEXT_ROAD_FULL && launch_flag == true){
-    cars[car_id].state = IN_GARAGE;
-  } 
-  return update_res;
 }
 
 void Cross::CalCost(){
