@@ -63,7 +63,7 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
     cars[car_id].true_start_time = T_count;
     cars[car_id].pos = 0;
     int update_status = -1;
-    if(max_car_number<5){
+    if(max_car_number<15){
       update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
     }
     if(update_status == ADD_SUCCESS) {
@@ -128,141 +128,128 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
   while(all_crosses_finished_flag == false){ //if not all crosses are not complete
     bool dead_lock_flag = true;
     bool has_waited_car_flag = false;
-    for(int i = 0; i<crosses.size(); i++){
-      //  StateShow(roads, crosses, cars);
+    for(int i = 0; i<crosses.size(); i++){ //repeat dispatching each cross
       int cur_car_id, next_road_id, cur_road_id, direction;
-      int j = 0;
-      for(j = 0; j<crosses[i].valid_roads_num; j++){ // find the first not empty road
-        if(crosses[i].road_queue[crosses[i].dispatch_seq[j]].empty() == false){
+      unordered_map<int, bool> road_wait_flag;
+      int count = 0;
+      for(int j = 0; j<crosses[i].valid_roads_num; j = (j+1)%crosses[i].valid_roads_num){ // find the first not empty road
+        if(crosses[i].road_queue[crosses[i].dispatch_seq[j]].empty() == false 
+            && road_wait_flag[crosses[i].dispatch_seq[j]] == false){
           cur_car_id = crosses[i].road_queue[crosses[i].dispatch_seq[j]].front();
+          cur_road_id = crosses[i].dispatch_seq[j];
+          count = 0;
+        }
+        else{
+          if(count == crosses[i].valid_roads_num) break;
+          count++;
+          continue;
+        }
+        
+        while(crosses[i].road_queue[cur_road_id].empty() == false){ //if current cross is not complete
+          // if(T_count > 400 && (i == 44 || i == 45)){
+          //   std::cout<<"cross_id"<<i<<", j:"<<j<<std::endl;
+          //   std::cout<<"cur_car_id:"<<cur_car_id<<std::endl;
+          //   std::cout<<"cur_car_id channel:"<<cars[cur_car_id].channel<<std::endl;
+          //   std::cout<<"cur_car_id pos:"<<cars[cur_car_id].pos<<std::endl;
+          //   std::cout<<std::endl;
+           // StateShow(roads, crosses, cars);
+          // }
+          has_waited_car_flag = true;
+          cur_car_id = crosses[i].road_queue[cur_road_id].front();
+          next_road_id = cars[cur_car_id].next_road_id;
+          direction = crosses[i].turn_direction[{cur_road_id, next_road_id}];
+
+          if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED)) {
+            if(crosses[i].road_queue[cur_road_id].empty()){
+                std::cerr<<"it seems some errors occur"<<std::endl;
+            }
+            crosses[i].road_queue[cur_road_id].pop();
+            if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
+            dead_lock_flag = false;
+          }
+          else if(direction == GO_STRAIGHT){
+              int add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
+              if(add_car_state == FRONT_CAR_WAIT){
+                wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
+                road_wait_flag[cur_road_id] = true;
+                break;
+              }
+              else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()) {
+                crosses[i].road_queue[cur_road_id].pop();
+                if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
+                dead_lock_flag = false;
+              }
+              else std::cerr<<"it seems some errors occur"<<std::endl;
+          }
+          else if(direction == TURN_LEFT){ // if the car needs to turn left, we need check wether there are other cars need to go straight
+            int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
+            road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_RIGHT}];
+            if(crosses[i].road_queue[road_id_tmp].empty() == false&& road_wait_flag[road_id_tmp] == false){
+              car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
+              direction_tmp = crosses[i].turn_direction[{cars[car_id_tmp].current_road_id, cars[car_id_tmp].next_road_id}];
+            }
+
+            if(direction_tmp == GO_STRAIGHT) {
+              break; 
+            }
+            else{
+              int add_car_state;
+              add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
+              if(add_car_state == FRONT_CAR_WAIT){
+                wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
+                road_wait_flag[cur_road_id] = true;
+                break;
+              }
+              else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()){
+                crosses[i].road_queue[cur_road_id].pop();
+                if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
+                dead_lock_flag = false;
+              }
+              else std::cerr<<"it seems some errors occur"<<std::endl;
+            } 
+          }
+          else{ // if the car needs to turn left, we need check wether there are car need to go straight or left
+            int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
+            road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_LEFT}];
+            if(crosses[i].road_queue[road_id_tmp].empty() == false && road_wait_flag[road_id_tmp] == false){
+              car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
+              direction_tmp = crosses[i].turn_direction[{cars[car_id_tmp].current_road_id, cars[car_id_tmp].next_road_id}];
+            }
+            int road_id_tmp1=-1, car_id_tmp1 =-1, direction_tmp1 = -1;
+            road_id_tmp1 = crosses[i].turn_road[{cars[cur_car_id].current_road_id, GO_STRAIGHT}];
+            if(crosses[i].road_queue[road_id_tmp1].empty() == false&& road_wait_flag[road_id_tmp1] == false){
+              car_id_tmp1 = crosses[i].road_queue[road_id_tmp1].front();
+              direction_tmp1 = crosses[i].turn_direction[{cars[car_id_tmp1].current_road_id, cars[car_id_tmp1].next_road_id}];
+            }
+
+            if(direction_tmp == GO_STRAIGHT || direction_tmp1 == TURN_LEFT){  //query wether there is car turns left
+              break;
+            }
+            else{
+              int add_car_state;
+              add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
+              if(add_car_state == FRONT_CAR_WAIT){
+                wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
+                road_wait_flag[cur_road_id] = true;
+                break;
+              }
+              else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()){
+                crosses[i].road_queue[cur_road_id].pop();
+                if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
+                dead_lock_flag = false;
+              }
+              else std::cerr<<"it seems some errors occur"<<std::endl;
+            }
+          }
+        }//end for while(cross_finish_flag[i] == false)
+      }//end for for(int j=0;...)
+      cross_finish_flag[i] = true;
+      for(int k = 0; k<crosses[i].valid_roads_num; k++){
+        if(crosses[i].road_queue[crosses[i].dispatch_seq[k]].empty() == false ){
+          cross_finish_flag[i] = false;
           break;
         }
       }
-      if(j == crosses[i].valid_roads_num){
-        cross_finish_flag[i] = true;
-      }
-      unordered_map<int, bool> road_wait_flag;
-      while(cross_finish_flag[i] == false){ //if current cross is not complete
-        has_waited_car_flag = true;
-        next_road_id = cars[cur_car_id].next_road_id;
-        cur_road_id = cars[cur_car_id].current_road_id;
-        direction = crosses[i].turn_direction[{cur_road_id, next_road_id}];
-
-        if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED)) {
-          if(!crosses[i].road_queue[cur_road_id].empty()){
-              std::cerr<<"it seems some errors occur"<<std::endl;
-          }
-          crosses[i].road_queue[cur_road_id].pop();
-          if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
-          dead_lock_flag = false;
-        }
-        else if(direction == GO_STRAIGHT){
-            int add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
-            if(add_car_state == FRONT_CAR_WAIT){
-              wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
-              road_wait_flag[cur_road_id] = true;
-              break;
-            }
-            else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()) {
-              crosses[i].road_queue[cur_road_id].pop();
-              if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
-              dead_lock_flag = false;
-            }
-            else std::cerr<<"it seems some errors occur"<<std::endl;
-        }
-        else if(direction == TURN_LEFT){ // if the car needs to turn left, we need check wether there are other cars need to go straight
-          int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
-          road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_RIGHT}];
-          if(crosses[i].road_queue[road_id_tmp].empty() == false&& road_wait_flag[road_id_tmp] == false){
-            car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
-            direction_tmp = crosses[i].turn_direction[{cars[car_id_tmp].current_road_id, cars[car_id_tmp].next_road_id}];
-          }
-
-          if(direction_tmp == GO_STRAIGHT) {
-            cur_car_id = car_id_tmp;
-            continue; 
-          }
-          else{
-            int add_car_state;
-            add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
-            if(add_car_state == FRONT_CAR_WAIT){
-              wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
-              road_wait_flag[cur_road_id] = true;
-              break;
-            }
-            else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()){
-              crosses[i].road_queue[cur_road_id].pop();
-              if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
-              dead_lock_flag = false;
-            }
-            else std::cerr<<"it seems some errors occur"<<std::endl;
-          } 
-        }
-        else{ // if the car needs to turn left, we need check wether there are car need to go straight or left
-          int road_id_tmp=-1, car_id_tmp=-1, direction_tmp = -1;
-          road_id_tmp = crosses[i].turn_road[{cars[cur_car_id].current_road_id, TURN_LEFT}];
-          if(crosses[i].road_queue[road_id_tmp].empty() == false && road_wait_flag[road_id_tmp] == false){
-            car_id_tmp = crosses[i].road_queue[road_id_tmp].front();
-            direction_tmp = crosses[i].turn_direction[{cars[car_id_tmp].current_road_id, cars[car_id_tmp].next_road_id}];
-          }
-          int road_id_tmp1=-1, car_id_tmp1 =-1, direction_tmp1 = -1;
-          road_id_tmp1 = crosses[i].turn_road[{cars[cur_car_id].current_road_id, GO_STRAIGHT}];
-          if(crosses[i].road_queue[road_id_tmp1].empty() == false&& road_wait_flag[road_id_tmp1] == false){
-            car_id_tmp1 = crosses[i].road_queue[road_id_tmp1].front();
-            direction_tmp1 = crosses[i].turn_direction[{cars[car_id_tmp1].current_road_id, cars[car_id_tmp1].next_road_id}];
-          }
-
-          if(direction_tmp == GO_STRAIGHT){//query wether there is car goes straight
-            cur_car_id = car_id_tmp;
-            continue;  
-          }
-          else if(direction_tmp1 == TURN_LEFT){  //query wether there is car turns left
-            cur_car_id = car_id_tmp1;
-            continue;
-          }
-          else{
-            int add_car_state;
-            add_car_state = crosses[i].UpdateCar(roads, cars, cur_car_id);
-            if(add_car_state == FRONT_CAR_WAIT){
-              wait_list[i] = roads[next_road_id].start == i?roads[next_road_id].end:roads[next_road_id].start;
-              road_wait_flag[cur_road_id] = true;
-              break;
-            }
-            else if((cars[cur_car_id].state == STOP ||cars[cur_car_id].state == REACHED) && !crosses[i].road_queue[cur_road_id].empty()){
-              crosses[i].road_queue[cur_road_id].pop();
-              if(cars[cur_car_id].state == REACHED) cars[cur_car_id].end_time = T_count;
-              dead_lock_flag = false;
-            }
-            else std::cerr<<"it seems some errors occur"<<std::endl;
-          }
-        }
-        int test_flag = false;
-        if(crosses[i].road_queue[cur_road_id].empty() == false && road_wait_flag[cur_road_id] == false){
-          cur_car_id = crosses[i].road_queue[cur_road_id].front();
-        }
-        else
-        {
-          for(int lala = 0;lala<crosses[i].valid_roads_num; lala++){
-            if(crosses[i].dispatch_seq[lala] == cur_road_id){
-              int haha = (lala+1)%crosses[i].valid_roads_num;
-              while(haha!=lala){
-                if(crosses[i].road_queue[crosses[i].dispatch_seq[haha]].empty() == false && 
-                  road_wait_flag[crosses[i].dispatch_seq[haha]] == false){
-                  cur_car_id = crosses[i].road_queue[crosses[i].dispatch_seq[haha]].front();
-                  break;
-                }
-                haha = (haha+1)%crosses[i].valid_roads_num;
-              }
-              if(haha == lala) test_flag = true;
-              if(haha == lala && wait_list[i] == -1) {
-                cross_finish_flag[i] = true;
-              }
-              else break;
-            }
-          }
-        }
-        if(test_flag == true) break;
-      }//end for while(cross_finish_flag[i] == false)
     }//end for for(int i;...)
     if(dead_lock_flag == true && has_waited_car_flag == true)  DealDealLock(wait_list, crosses, cars, roads);
     all_crosses_finished_flag = true;

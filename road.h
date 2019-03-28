@@ -86,6 +86,8 @@ class Road {
   //                    vector<int>& lane_last_pos, vector<int>&
   //                    lane_last_time);
   void UpdateLastCar(const vector<Car>& cars);
+  void UpdateChannel(vector<Car>& cars, int channel, int direction);
+void UpdateChannelLane(vector<Car>& cars,vector<vector<int>>& lane, int channel);
 };
 
 inline std::ostream& operator<<(std::ostream& ouput, Road road){

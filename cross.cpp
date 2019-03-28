@@ -57,7 +57,7 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
             {
               cars[car_id].next_road_id = cars[car_id].current_road_id;
             }
-            if(cars[car_id].current_road_id == next_road_id){
+            if(cars[car_id].current_road_id ==  cars[car_id].next_road_id && cars[car_id].end != id){
               std::cerr<<"the initial value is wrong"<<std::endl;
             }
             road_queue[dispatch_seq[i]].push(car_id);
