@@ -16,6 +16,9 @@
 #define TURN_LEFT 1
 #define TURN_RIGHT 2
 
+#define UPDATE_SUCCESS 0
+#define UPDATE_FAILED 1
+
 using std::map;
 using std::set;
 using std::vector;

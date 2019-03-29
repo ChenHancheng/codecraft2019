@@ -27,11 +27,11 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
         else if(id == roads[dispatch_seq[i]].start && roads[dispatch_seq[i]].bidirectional == true){
           car_id = roads[dispatch_seq[i]].lane1[k][j];
         }
-        if(car_id != -1 && cars[car_id].state==WAIT){
+        if(car_id != -1 && cars[car_id].state==WAIT && cars[car_id].next_road_id == -1){
           int min_cost = INF;
           int next_road_id;
           for(int l=0; l<valid_roads_num; l++){
-            if(l == i) continue;
+            if(dispatch_seq[l] == cars[car_id].current_road_id) continue;
             int next_road_id_tmp = dispatch_seq[l];
             int cost;
             int direction_tmp;
@@ -65,6 +65,9 @@ void Cross::InitialValue(vector<Road>& roads, vector<Car>& cars, const vector<ve
           }
           road_queue[dispatch_seq[i]].push(car_id);
         }
+        else if(car_id != -1 && cars[car_id].state==WAIT){
+          road_queue[dispatch_seq[i]].push(car_id);
+        }
       }//end of for(0->channel)
     }
   }
@@ -76,9 +79,6 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
   if(cars[car_id].state == IN_GARAGE){
     int next_road_id = cars[car_id].next_road_id;
     update_res = roads[next_road_id].AddCar(cars, car_id, cars[car_id].direction);
-    // if(update_res == NEXT_ROAD_FULL){
-    //   cars[car_id].state = IN_GARAGE;
-    // }
     if(update_res == ADD_SUCCESS){
       cars[car_id].state = STOP;
     }
@@ -95,9 +95,9 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
       roads[cur_road_id].DeleteCar(cars, car_id);
       return ADD_SUCCESS; //TO_DO:change ADD_SUCCESS to UPDATE_SUCCESS seems more reasonable
     }
-    if(s1>=v2 || (cars[car_id].pos != 0 && cars[car_id].direction == 0 && roads[cur_road_id].lane0[cars[car_id].channel][0]!=POS_BLANK) 
-        || (cars[car_id].pos != 0 && cars[car_id].direction == 1 && roads[cur_road_id].lane1[cars[car_id].channel][0]!=POS_BLANK)){
-    // if(s1>=v2){
+    // if(s1>=v2 || (cars[car_id].pos != 0 && cars[car_id].direction == 0 && roads[cur_road_id].lane0[cars[car_id].channel][0]!=POS_BLANK) 
+    //     || (cars[car_id].pos != 0 && cars[car_id].direction == 1 && roads[cur_road_id].lane1[cars[car_id].channel][0]!=POS_BLANK)){
+    if(s1>=v2){
       roads[cur_road_id].UpdateCar(cars, car_id);
       cars[car_id].state = STOP;
       return ADD_SUCCESS;
@@ -109,8 +109,6 @@ int Cross::UpdateCar(vector<Road>& roads, vector<Car>& cars, int car_id){
       update_res = roads[next_road_id].AddCar(cars, car_id, direction);
       if(update_res == NEXT_ROAD_FULL){
         roads[cur_road_id].UpdateCar(cars, car_id);
-        // tmp++;
-        // std::cout<<tmp<<std::endl;
         cars[car_id].state = STOP;
         return ADD_SUCCESS;
         // return FRONT_CAR_WAIT;

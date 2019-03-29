@@ -84,7 +84,7 @@ void WriteAnswerFile(const vector<Car>& cars, const string& answer_path){
     std::cerr<<"open answer file failed"<<std::endl;
   }
   for(int i=0; i<cars.size(); i++){
-    ofs<<'('<<carcount_id[cars[i].id]<<','<<cars[i].true_start_time<<',';
+    ofs<<'('<<carcount_id[cars[i].id]<<','<<cars[i].true_start_time<<',';//<<cars[i].end_time-cars[i].true_start_time<<','; 
     for(int j=0; j<cars[i].path.size(); j++){
       ofs<<roadcount_id[cars[i].path[j]];
       if(j != cars[i].path.size()-1) ofs<<','; 

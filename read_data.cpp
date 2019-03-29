@@ -39,6 +39,9 @@ void ReadData(const string& car_path, const string& cross_path, const string& ro
     cars_data[i].start = crossid_count[cars_data[i].start];
     cars_data[i].end = crossid_count[cars_data[i].end];
     ready_cars[cars_data[i].plan_time].push(cars_data[i].id);
+    // if(carcount_id[cars_data[i].id] - cars_data[i].id != 10000){
+    //   std::cout<<"asdf";
+    // }
     cars.push_back(Car(cars_data[i]));
   }
     
