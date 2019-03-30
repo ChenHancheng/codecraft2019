@@ -18,6 +18,7 @@ using std::pair;
 using std::vector;
 using std::min;
 
+unsigned long int total_launched = 0;
 unsigned long int T_count=0;
 void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Graph& graph, unordered_map<int, priority_queue<int, vector<int>, std::greater<int>>> ready_cars){
   int roads_num = roads.size();
@@ -35,9 +36,13 @@ void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Gr
     RecordSolution(cars, roads, crosses);
     LaunchCar(T_count, cars, crosses, ready_cars, roads, graph);
     // if(T_count == 15) StateShow(roads, crosses, cars);
-    if(T_count%100 == 0) std::cout<<T_count<<":Total "<< Cross::reached_cars<<"cars reached "<<std::endl;
-    if(Cross::reached_cars == cars.size()){
-      std::cout<<"all cars reached"<<std::endl;
+    if (T_count % 100 == 0)
+      std::cout << T_count << ":Total " << Cross::reached_cars
+                << " cars reached"
+                << ". There are " << total_launched - Cross::reached_cars
+                << " cars on road " << std::endl;
+    if (Cross::reached_cars == cars.size()) {
+      std::cout << "all cars reached" << std::endl;
       std::cout<<"total cost "<<T_count <<" time"<<std::endl;
       break;
     }
@@ -49,7 +54,6 @@ void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Gr
   }
   std::cout<<"all cars total cost:"<<total_time<<std::endl;
 }
-int total_launched;
 // add those cars which should launch at time T_count
 void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered_map<int, priority_queue<int, vector<int>, std::greater<int>>>& ready_car, vector<Road>& roads, Graph& graph){
   int ready_car_num = 0;
@@ -76,7 +80,7 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
     cars[car_id].true_start_time = T_count;
     cars[car_id].pos = 0;
     int update_status = -1;
-    if(max_car_number<20){
+    if(max_car_number<23){
       if(cars[car_id].direction == 0 && roads[road_id].cars_num_road0 < roads[road_id].length){
         update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
       }
