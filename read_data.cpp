@@ -36,6 +36,7 @@ void ReadData(const string& car_path, const string& cross_path, const string& ro
   ReadCar(car_path, cars_data);
   ReadCross(cross_path, crosses_data);
   ReadRoad(road_path, roads_data);
+    
   sort(cars_data.begin(), cars_data.end(), [](CarData a, CarData b){
     return a.id<b.id;
   });
@@ -49,6 +50,11 @@ void ReadData(const string& car_path, const string& cross_path, const string& ro
   for(int i=0; i<cars_data.size(); i++){
     cars_data[i].start = crossid_count[cars_data[i].start];
     cars_data[i].end = crossid_count[cars_data[i].end];
+    carid_count[cars_data[i].id] = i;
+    carcount_id[i] = cars_data[i].id;
+
+    cars_data[i].id = i;
+
     ready_cars[cars_data[i].plan_time].push(cars_data[i].id);
 
     cars.push_back(Car(cars_data[i]));
@@ -143,9 +149,8 @@ bool ReadCar(const string& car_path, vector<CarData>& cars_data){
     }
     else{
       if(ifs>>tmp) {
-        carid_count[tmp.id] = count;
-        carcount_id[count] = tmp.id;
-        tmp.id = count; //make id starts from 0
+
+        // tmp.id = count; //make id starts from 0
         cars_data.push_back(tmp);
         count++;
       }

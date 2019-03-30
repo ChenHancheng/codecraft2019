@@ -59,19 +59,8 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
   int ready_car_num = 0;
   int max_car_number = 0;
   vector<int> crosses_count(crosses.size(), 0);
-  // vector<int, int> speed;
-  // for(int i = 0; i < cars.size(); i++)
-  // {
-  //   /* code */
-  // }
-  
   if(ready_car.count(T_count) > 0) ready_car_num = ready_car[T_count].size();
   for(int i = 0; i<ready_car_num; i++){
-      // vector<int, int> speed;
-      // for(int i = 0; i < cars.size(); i++)
-      // {
-      //   speed[cars[]]
-      // }
     int car_id = ready_car[T_count].top();
     int cross_id = graph.parent_matrix[cars[car_id].start][cars[car_id].end];
     int road_id = graph.adj_matrix[cars[car_id].start][cross_id];
@@ -80,11 +69,11 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
     cars[car_id].true_start_time = T_count;
     cars[car_id].pos = 0;
     int update_status = -1;
-    if(max_car_number<23){
-      if(cars[car_id].direction == 0 && roads[road_id].cars_num_road0 < roads[road_id].length){
+    if(max_car_number<15){
+      if(cars[car_id].direction == 0 && roads[road_id].cars_num_road0 < roads[road_id].length*roads[road_id].channel/2){
         update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
       }
-      if(cars[car_id].direction == 1 && roads[road_id].cars_num_road1 < roads[road_id].length){
+      if(cars[car_id].direction == 1 && roads[road_id].cars_num_road1 < roads[road_id].length*roads[road_id].channel/2){
         update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
       }
     }

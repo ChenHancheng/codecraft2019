@@ -93,7 +93,7 @@ int Road::QueryRoadStateLane(const vector<Car>& cars, int car_id,
     channelNo++;
   }
   if (channelNo == channel)
-    return INF;
+    return INF/2;
   else
     return max(lane_last_time[channelNo], length / cars[car_id].speed);
 }
