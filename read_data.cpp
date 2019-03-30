@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <queue>
+#include <algorithm>
 
 #include "data_type.h"
 #include "read_data.h"
@@ -16,6 +17,7 @@ using std::string;
 using std::ifstream;
 using std::vector;
 using std::unordered_map;
+using std::sort;
 
 unordered_map<int, int> carid_count;
 unordered_map<int, int> carcount_id;
@@ -34,14 +36,21 @@ void ReadData(const string& car_path, const string& cross_path, const string& ro
   ReadCar(car_path, cars_data);
   ReadCross(cross_path, crosses_data);
   ReadRoad(road_path, roads_data);
+  sort(cars_data.begin(), cars_data.end(), [](CarData a, CarData b){
+    return a.id<b.id;
+  });
 
+  sort(roads_data.begin(), roads_data.end(), [](RoadData a, RoadData b){
+    return a.id<b.id;
+  });
+  sort(crosses_data.begin(), crosses_data.end(), [](CrossData a, CrossData b){
+    return a.id<b.id;
+  });
   for(int i=0; i<cars_data.size(); i++){
     cars_data[i].start = crossid_count[cars_data[i].start];
     cars_data[i].end = crossid_count[cars_data[i].end];
     ready_cars[cars_data[i].plan_time].push(cars_data[i].id);
-    // if(carcount_id[cars_data[i].id] - cars_data[i].id != 10000){
-    //   std::cout<<"asdf";
-    // }
+
     cars.push_back(Car(cars_data[i]));
   }
     

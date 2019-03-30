@@ -35,8 +35,7 @@ void Dispatch(vector<Car>& cars, vector<Road>& roads, vector<Cross>& crosses, Gr
     RecordSolution(cars, roads, crosses);
     LaunchCar(T_count, cars, crosses, ready_cars, roads, graph);
     // if(T_count == 15) StateShow(roads, crosses, cars);
-
-    std::cout<<T_count<<":Total "<< Cross::reached_cars<<"cars reached "<<std::endl;
+    if(T_count%100 == 0) std::cout<<T_count<<":Total "<< Cross::reached_cars<<"cars reached "<<std::endl;
     if(Cross::reached_cars == cars.size()){
       std::cout<<"all cars reached"<<std::endl;
       std::cout<<"total cost "<<T_count <<" time"<<std::endl;
@@ -55,8 +54,20 @@ int total_launched;
 void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered_map<int, priority_queue<int, vector<int>, std::greater<int>>>& ready_car, vector<Road>& roads, Graph& graph){
   int ready_car_num = 0;
   int max_car_number = 0;
+  vector<int> crosses_count(crosses.size(), 0);
+  // vector<int, int> speed;
+  // for(int i = 0; i < cars.size(); i++)
+  // {
+  //   /* code */
+  // }
+  
   if(ready_car.count(T_count) > 0) ready_car_num = ready_car[T_count].size();
   for(int i = 0; i<ready_car_num; i++){
+      // vector<int, int> speed;
+      // for(int i = 0; i < cars.size(); i++)
+      // {
+      //   speed[cars[]]
+      // }
     int car_id = ready_car[T_count].top();
     int cross_id = graph.parent_matrix[cars[car_id].start][cars[car_id].end];
     int road_id = graph.adj_matrix[cars[car_id].start][cross_id];
@@ -66,9 +77,15 @@ void LaunchCar(int T_count, vector<Car>& cars, vector<Cross>& crosses, unordered
     cars[car_id].pos = 0;
     int update_status = -1;
     if(max_car_number<20){
-      update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
+      if(cars[car_id].direction == 0 && roads[road_id].cars_num_road0 < roads[road_id].length){
+        update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
+      }
+      if(cars[car_id].direction == 1 && roads[road_id].cars_num_road1 < roads[road_id].length){
+        update_status = crosses[cross_id].UpdateCar(roads, cars, car_id); 
+      }
     }
     if(update_status == ADD_SUCCESS) {
+      crosses_count[cross_id]++;
       max_car_number++;
       total_launched++;
     }
@@ -139,7 +156,7 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
           cur_car_id = crosses[i].road_queue[cur_road_id].front();
           next_road_id = cars[cur_car_id].next_road_id;
           direction = crosses[i].turn_direction[{cur_road_id, next_road_id}]; 
-          if(T_count == 21 && i == 17){
+          // if(T_count == 21 && i == 17){
             // std::cout<<"cross_id:"<<i<<", j:"<<j<<std::endl;
             // std::cout<<"road speed:"<<roads[cur_road_id].speed_limit<<std::endl;
             // std::cout<<"next road speed:"<<roads[cars[cur_car_id].next_road_id].speed_limit<<std::endl;
@@ -151,7 +168,7 @@ void RecordSolution(vector<Car>& cars, vector<Road>& roads, vector<Cross>& cross
             // std::cout<<"cur_car_id speed:"<<cars[cur_car_id].speed<<std::endl;
             // std::cout<<std::endl;
             // StateShow(roads, crosses, cars);
-          }
+          // }
 
           if(cars[cur_car_id].state == STOP) {
             if(crosses[i].road_queue[cur_road_id].empty()){

@@ -30,7 +30,7 @@ void Graph::Dijkstra(const vector<Road>& roads, int start){
     for(int j = 0; j<vertex_num_; j++){
       if(adj_matrix[u][j] == INF) continue;
       int cost_startu = min_dist;
-      int cost_uj = roads[adj_matrix[u][j]].length;
+      int cost_uj = (10*roads[adj_matrix[u][j]].length)/roads[adj_matrix[u][j]].speed_limit;
       int cost_startj =cost_matrix[start][j];
       if(cost_startu+cost_uj < cost_startj){
         cost_matrix[start][j] = cost_startu + cost_uj;
